@@ -1,0 +1,189 @@
+/*
+ * Amazon Tariff Checker - Checks if products are subject to tariff taxes when shipping to the US
+ * Copyright (c) 2025 The Dual Lens (https://duallens.substack.com)
+ * 
+ * This code is licensed under the MIT License.
+ */
+
+body {
+  font-family: Arial, sans-serif;
+  width: 350px;
+  padding: 16px;
+  margin: 0;
+  color: #333;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h1 {
+  font-size: 20px;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #232F3E; /* Amazon dark blue */
+}
+
+button {
+  background-color: #FFD814; /* Amazon yellow */
+  border: 1px solid #FCD200;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #F7CA00;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.hidden {
+  display: none;
+}
+
+#status {
+  text-align: center;
+  font-style: italic;
+  color: #555;
+  padding: 6px;
+  min-height: 20px;
+}
+
+#result {
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+#productInfo {
+  margin-bottom: 16px;
+}
+
+.product-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.product-price {
+  margin-bottom: 4px;
+}
+
+.product-origin {
+  margin-bottom: 8px;
+}
+
+.warning {
+  color: #e77600; /* Amazon warning orange */
+}
+
+.hts-code {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.tariff-status {
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.subject {
+  color: #B12704; /* Amazon price red */
+  background-color: #fff4f4;
+}
+
+.exempt {
+  color: #007600; /* Amazon success green */
+  background-color: #f4fff4;
+}
+
+#tariffAmount {
+  margin-top: 12px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+.highlight {
+  font-weight: bold;
+  color: #B12704;
+}
+
+.total-cost {
+  margin-top: 8px;
+  font-weight: bold;
+}
+
+.explanation {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.fallback-warning {
+  margin-top: 16px;
+  padding: 8px;
+  background-color: #fff8e7;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Added styles for data source information */
+.data-source-info {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #eee;
+  font-size: 12px;
+}
+
+.data-source-info p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.data-source-info ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.data-source-info li {
+  margin-bottom: 4px;
+}
+
+.disclaimer {
+  font-style: italic;
+  color: #666;
+  font-size: 11px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed #ddd;
+}
+
+/* Added styles for May 2, 2025 update notice */
+.update-notice {
+  background-color: #fff4f4;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #B12704;
+  font-weight: bold;
+  color: #333;
+  margin: 10px 0;
+  line-height: 1.5;
+}

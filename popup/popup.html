@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Amazon Tariff Tax Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Amazon Tariff Tax Checker</h1>
+    <div id="status">Click the button to check tariff status</div>
+    <button id="checkTariff">Check Tariff</button>
+    <div id="result" class="hidden">
+      <div id="productInfo"></div>
+      <div id="tariffStatus"></div>
+      <div id="tariffAmount" class="highlight hidden"></div>
+    </div>
+    <div class="data-source-info">
+      <p>Tariff data is sourced from official U.S. government sources including:</p>
+      <ul>
+        <li>U.S. Customs and Border Protection</li>
+        <li>U.S. Department of Commerce</li>
+        <li>Office of the U.S. Trade Representative</li>
+        <li>White House Executive Orders on Trade</li>
+      </ul>
+      <p class="update-notice">IMPORTANT UPDATE: As of May 2, 2025, the de minimis exemption has been eliminated for goods from China and Hong Kong. Chinese goods now face 125% total tariff rates or $100 flat fees for postal shipments.</p>
+      <p>Last updated: May 2, 2025</p>
+      <p class="disclaimer">Tariff rates are subject to change. This extension provides estimates based on the best available public information. For the most current and authoritative information, please consult the official U.S. Customs and Border Protection website.</p>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

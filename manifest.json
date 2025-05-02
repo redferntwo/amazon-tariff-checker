@@ -1,0 +1,50 @@
+/**
+ * Amazon Tariff Checker
+ * Copyright (c) 2025 Dual Lens (https://duallens.substack.com)
+ * This code is licensed under the MIT License.
+ * For the full license text, see the LICENSE file in the project repository
+ * or visit: https://opensource.org/licenses/MIT
+ * DISCLAIMER: This extension is not affiliated with Amazon.com. It only processes
+ * information visible on the current page and does not collect or transmit user data.
+ * All analysis occurs locally within the browser.
+ */
+
+
+{
+  "manifest_version": 3,
+  "name": "Amazon Tariff Checker",
+  "version": "1.1.0",
+  "description": "Estimates and highlights tariff costs on Amazon products",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.amazon.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.com/*/dp/*", "*://*.amazon.com/dp/*"],
+      "js": ["scripts/content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["scripts/content-injection.js"],
+      "matches": ["*://*.amazon.com/*"]
+    }
+  ]
+}
