@@ -1,30 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Amazon Tariff Tax Checker</title>
-  <link rel="stylesheet" href="popup.css">
+  <!--
+    Amazon Tariff Fee Checker - Checks if products are subject to tariff fees when shipping to the US
+    Copyright (c) 2025 The Dual Lens (https://duallens.substack.com)
+    
+    This code is licensed under the MIT License.
+    
+    DISCLAIMER: This extension is not affiliated with Amazon.com. It only processes
+    information visible on the current page and does not collect or transmit user data.
+    All analysis occurs locally within the browser.
+  -->
+  <meta charset="utf-8">
+  <title>Amazon Tariff Fee Checker</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>Amazon Tariff Tax Checker</h1>
-    <div id="status">Click the button to check tariff status</div>
-    <button id="checkTariff">Check Tariff</button>
-    <div id="result" class="hidden">
-      <div id="productInfo"></div>
-      <div id="tariffStatus"></div>
-      <div id="tariffAmount" class="highlight hidden"></div>
+    <div class="header">
+      <h1>Amazon Tariff Fee Checker</h1>
     </div>
-    <div class="data-source-info">
-      <p>Tariff data is sourced from official U.S. government sources including:</p>
-      <ul>
-        <li>U.S. Customs and Border Protection</li>
-        <li>U.S. Department of Commerce</li>
-        <li>Office of the U.S. Trade Representative</li>
-        <li>White House Executive Orders on Trade</li>
-      </ul>
-      <p class="update-notice">IMPORTANT UPDATE: As of May 2, 2025, the de minimis exemption has been eliminated for goods from China and Hong Kong. Chinese goods now face 125% total tariff rates or $100 flat fees for postal shipments.</p>
-      <p>Last updated: May 2, 2025</p>
-      <p class="disclaimer">Tariff rates are subject to change. This extension provides estimates based on the best available public information. For the most current and authoritative information, please consult the official U.S. Customs and Border Protection website.</p>
+    <div class="content">
+      <p class="status" id="statusMessage">Checking current page...</p>
+      <div id="resultContainer" class="hidden">
+        <div class="result-box" id="resultBox">
+          <p id="resultMessage"></p>
+        </div>
+      </div>
+      <div class="info-section">
+        <h2>About This Extension</h2>
+        <p>This extension helps you identify products on Amazon that might be subject to import tariff fees when shipping to the US.</p>
+        <p>It analyzes product information on the page to detect potential cross-border shipments that could incur additional fees.</p>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Created by <a href="https://duallens.substack.com" target="_blank">The Dual Lens</a></p>
+      <p>Version 1.0</p>
     </div>
   </div>
   <script src="popup.js"></script>
