@@ -1,17 +1,3 @@
-/**
- * Amazon Tariff Checker
- * Copyright (c) 2025 Dual Lens (https://duallens.substack.com)
- * This code is licensed under the MIT License.
- * For the full license text, see the LICENSE file in the project repository
- * or visit: https://opensource.org/licenses/MIT
- * DISCLAIMER: This extension is not affiliated with Amazon.com. It only processes
- * information visible on the current page and does not collect or transmit user data.
- * All analysis occurs locally within the browser.
- */
-
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
   const checkButton = document.getElementById('checkTariff');
   const statusDiv = document.getElementById('status');

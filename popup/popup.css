@@ -1,10 +1,3 @@
-/*
- * Amazon Tariff Checker - Checks if products are subject to tariff taxes when shipping to the US
- * Copyright (c) 2025 The Dual Lens (https://duallens.substack.com)
- * 
- * This code is licensed under the MIT License.
- */
-
 body {
   font-family: Arial, sans-serif;
   width: 350px;
@@ -36,6 +29,7 @@ button {
   font-weight: 500;
   font-size: 14px;
   transition: all 0.2s;
+  width: 100%; /* Make button full width */
 }
 
 button:hover {
