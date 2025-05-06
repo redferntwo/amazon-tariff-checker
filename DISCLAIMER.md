@@ -2,7 +2,7 @@
 
 ## Non-Affiliation Notice
 
-This "Amazon Tariff Checker" extension (the "Extension") is an independent project created by Dual Lens (https://duallens.substack.com) and is not affiliated with, endorsed by, sponsored by, or in any way officially connected with Amazon.com, Inc. or any of its subsidiaries or affiliates.
+This "Amazon Tariff Checker" extension (the "Extension") is an independent project and is not affiliated with, endorsed by, sponsored by, or in any way officially connected with Amazon.com, Inc. or any of its subsidiaries or affiliates.
 
 The Extension utilizes public information available on Amazon.com product pages to provide users with estimates of potential tariff taxes that might apply when shipping products internationally. This is provided as an informational tool only.
 
