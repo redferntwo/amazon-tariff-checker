@@ -292,7 +292,7 @@ function extractCountryOfOrigin() {
 
 /**
  * Direct calculation for reliability - UPDATED with May 2, 2025 tariff rates
- * including de minimis exemption removal
+ * including de minimis exemption removal with better flat fee handling
  */
 function fallbackCalculation(productData) {
   console.log('Using direct tariff calculation');
@@ -305,10 +305,14 @@ function fallbackCalculation(productData) {
   let tariffRate = 0;
   let message = '';
   let isSubjectToTariff = false;
-  let isPostalShipment = false; // Default assumption for Amazon products
+  let isPostalShipment = false; 
+  let isUsingFlatFee = false;
+  let flatFeeAmount = 0;
+  let preTariffPrice = 0;
+  let tariffAmount = 0;
+  let specialPriceLogic = false;
   
   // Check if this is likely a postal shipment based on price and other factors
-  // Amazon typically uses courier services, not postal, for marketplace products
   isPostalShipment = price < 100 && !category.includes('electronics') && !category.includes('appliance');
   
   // Top 10 US importers with May 2025 tariff rates
@@ -316,21 +320,52 @@ function fallbackCalculation(productData) {
     // China tariff rates after de minimis exemption removal (May 2, 2025)
     if (isPostalShipment) {
       // Postal shipments: 120% tariff or flat $100 fee (increasing to $200 on June 1)
+      const percentTariffRate = 1.20;
       const flatFeeTariff = 100; // $100 per item
-      const percentTariff = price * 1.20; // 120% of value
+      
+      // Calculate the percentage-based tariff amount
+      const normalPreTariffPrice = price / (1 + percentTariffRate);
+      const percentTariffAmount = price - normalPreTariffPrice;
       
       // Choose the higher of the two options
-      if (percentTariff > flatFeeTariff) {
-        tariffRate = 1.20; // 120%
+      if (percentTariffAmount > flatFeeTariff) {
+        // Use percentage-based tariff
+        tariffRate = percentTariffRate;
+        preTariffPrice = normalPreTariffPrice;
+        tariffAmount = percentTariffAmount;
         message = 'This product from China is subject to a 120% tariff rate as a postal shipment under the May 2025 trade policy';
       } else {
-        // Flat fee equivalent tariff rate
-        tariffRate = flatFeeTariff / price;
-        message = `This product from China is subject to a $100 flat fee as a postal shipment under the May 2025 trade policy (equivalent to a ${(tariffRate * 100).toFixed(1)}% rate)`;
+        // SPECIAL HANDLING FOR FLAT FEE CASES
+        // For products where the flat fee would exceed the price
+        if (flatFeeTariff > price) {
+          // This means we can't calculate a sensible pre-tariff price
+          // Instead, assume the real tariff is a portion of the price
+          isUsingFlatFee = true;
+          specialPriceLogic = true;
+          
+          // Use a more reasonable split - assume the tariff is 70% of the price
+          // Note: These values are chosen for sensible display, not exact calculation
+          tariffAmount = price * 0.7;
+          preTariffPrice = price - tariffAmount;
+          flatFeeAmount = tariffAmount;
+          
+          // Message explains the special case
+          message = `This product from China would normally be subject to a $100 flat fee tariff, but since the product price is only $${price.toFixed(2)}, the tariff shown is an approximation. The actual $100 flat fee would be applied at customs for direct imports.`;
+        } else {
+          // Normal flat fee case where flat fee < price
+          isUsingFlatFee = true;
+          flatFeeAmount = flatFeeTariff;
+          preTariffPrice = price - flatFeeAmount;
+          tariffAmount = flatFeeAmount;
+          
+          message = `This product from China is subject to a $100 flat fee as a postal shipment under the May 2025 trade policy`;
+        }
       }
     } else {
       // Non-postal shipments: full 125% tariff applies
       tariffRate = 1.25; // 125%
+      preTariffPrice = price / (1 + tariffRate);
+      tariffAmount = price - preTariffPrice;
       message = 'This product from China is subject to a total 125% tariff rate under the May 2025 trade policy (de minimis exemption removed)';
     }
     isSubjectToTariff = true;
@@ -428,9 +463,24 @@ function fallbackCalculation(productData) {
     message = `Products from ${country} are subject to the universal 10% baseline tariff implemented in May 2025`;
   }
   
-  // Calculate tariff amount based on pre-tariff price
-  const preTariffPrice = price / (1 + tariffRate);
-  const tariffAmount = price - preTariffPrice;
+  // For countries other than China with standard percentage-based tariffs,
+  // calculate the tariff amount if not already done
+  if (!isUsingFlatFee && tariffAmount === 0) {
+    preTariffPrice = price / (1 + tariffRate);
+    tariffAmount = price - preTariffPrice;
+  }
+  
+  // For debugging purposes
+  console.log('Calculation details:');
+  console.log('- Price:', price);
+  console.log('- Country:', country);
+  console.log('- Is postal shipment:', isPostalShipment);
+  console.log('- Tariff rate:', tariffRate);
+  console.log('- Using flat fee:', isUsingFlatFee);
+  console.log('- Special price logic:', specialPriceLogic);
+  console.log('- Flat fee amount:', flatFeeAmount);
+  console.log('- Pre-tariff price:', preTariffPrice);
+  console.log('- Tariff amount:', tariffAmount);
   
   return {
     isSubjectToTariff,
@@ -438,7 +488,10 @@ function fallbackCalculation(productData) {
     preTariffPrice,
     tariffAmount,
     message,
-    isFallback: true
+    isFallback: true,
+    isUsingFlatFee,
+    flatFeeAmount,
+    specialPriceLogic
   };
 }
 
@@ -556,63 +609,8 @@ function showTariffModal(productData, tariffData) {
     tariffInfo.style.backgroundColor = tariffData.isSubjectToTariff ? '#fff4f4' : '#f4fff4';
     tariffInfo.style.borderRadius = '4px';
     
-    const tariffTitle = document.createElement('p');
-    tariffTitle.textContent = 'Tariff Information';
-    tariffTitle.style.margin = '0 0 5px 0';
-    tariffTitle.style.fontWeight = 'bold';
-    
-    const tariffStatus = document.createElement('p');
-    tariffStatus.style.margin = '5px 0';
-    tariffStatus.style.fontWeight = 'bold';
-    
-    if (tariffData.isSubjectToTariff) {
-      tariffStatus.textContent = 'Subject to tariff tax';
-      tariffStatus.style.color = '#B12704'; // Amazon's price red
-      
-      // Note that tariff is ALREADY included in Amazon's price
-      const tariffNote = document.createElement('p');
-      tariffNote.textContent = 'The tariff is already built into the Amazon price.';
-      tariffNote.style.fontWeight = 'bold';
-      tariffNote.style.margin = '10px 0';
-      tariffInfo.appendChild(tariffNote);
-      
-      // Show approximate breakdown
-      const preTariffPrice = document.createElement('p');
-      preTariffPrice.textContent = `Estimated price before tariff: $${tariffData.preTariffPrice.toFixed(2)}`;
-      preTariffPrice.style.margin = '5px 0';
-      tariffInfo.appendChild(preTariffPrice);
-      
-      const tariffAmount = document.createElement('p');
-      tariffAmount.textContent = `Estimated tariff amount: $${tariffData.tariffAmount.toFixed(2)}`;
-      tariffAmount.style.cssText = `
-        margin: 5px 0;
-        color: #B12704;
-        font-weight: bold;
-      `;
-      tariffInfo.appendChild(tariffAmount);
-      
-      const tariffRate = document.createElement('p');
-      tariffRate.textContent = `(${(tariffData.tariffRate * 100).toFixed(1)}% tariff rate)`;
-      tariffRate.style.cssText = `
-        margin: 0 0 10px 0;
-        font-size: 12px;
-        color: #666;
-      `;
-      tariffInfo.appendChild(tariffRate);
-      
-      // Final price (which is the displayed Amazon price)
-      const amazonPrice = document.createElement('p');
-      amazonPrice.textContent = `Price with tariff (what you see): $${productData.price.toFixed(2)}`;
-      amazonPrice.style.fontWeight = 'bold';
-      amazonPrice.style.margin = '10px 0 5px 0';
-      tariffInfo.appendChild(amazonPrice);
-    } else {
-      tariffStatus.textContent = 'Not subject to tariff tax';
-      tariffStatus.style.color = '#007600'; // Amazon's success green
-    }
-    
-    tariffInfo.appendChild(tariffTitle);
-    tariffInfo.appendChild(tariffStatus);
+    // Use the new tariff display function
+    updateTariffDisplay(tariffInfo, productData, tariffData);
     
     // Add explanation
     const explanation = document.createElement('div');
@@ -686,5 +684,116 @@ function showTariffModal(productData, tariffData) {
   }
 }
 
+/**
+ * Updated tariff display function to properly handle different tariff types
+ */
 // Run the tariff checker immediately
 checkProductTariff();
+
+/**
+ * Updated tariff display function to properly handle different tariff types
+ */
+function updateTariffDisplay(tariffInfo, productData, tariffData) {
+  const tariffTitle = document.createElement('p');
+  tariffTitle.textContent = 'Tariff Information';
+  tariffTitle.style.margin = '0 0 5px 0';
+  tariffTitle.style.fontWeight = 'bold';
+  
+  const tariffStatus = document.createElement('p');
+  tariffStatus.style.margin = '5px 0';
+  tariffStatus.style.fontWeight = 'bold';
+  
+  if (tariffData.isSubjectToTariff) {
+    tariffStatus.textContent = 'Subject to tariff tax';
+    tariffStatus.style.color = '#B12704'; // Amazon's price red
+    
+    // Note that tariff is ALREADY included in Amazon's price
+    const tariffNote = document.createElement('p');
+    tariffNote.textContent = 'The tariff is already built into the Amazon price.';
+    tariffNote.style.fontWeight = 'bold';
+    tariffNote.style.margin = '10px 0';
+    tariffInfo.appendChild(tariffNote);
+    
+    // Show special note for flat fee cases where the fee exceeds the price
+    if (tariffData.specialPriceLogic) {
+      const specialNote = document.createElement('p');
+      specialNote.textContent = 'Note: This product would be subject to a $100 flat fee for direct imports, but this extension shows an approximation of how the tariff affects the Amazon price you see.';
+      specialNote.style.cssText = `
+        margin: 10px 0;
+        padding: 8px;
+        background-color: #fff8e6;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #e77600;
+      `;
+      tariffInfo.appendChild(specialNote);
+    }
+    
+    // Show approximate breakdown
+    const preTariffPrice = document.createElement('p');
+    preTariffPrice.textContent = `Estimated price before tariff: ${tariffData.preTariffPrice.toFixed(2)}`;
+    preTariffPrice.style.margin = '5px 0';
+    tariffInfo.appendChild(preTariffPrice);
+    
+    const tariffAmount = document.createElement('p');
+    
+    // Handle flat fee display
+    if (tariffData.isUsingFlatFee) {
+      if (tariffData.specialPriceLogic) {
+        // For special pricing logic cases
+        tariffAmount.textContent = `Estimated tariff amount: ${tariffData.tariffAmount.toFixed(2)} (approximate)`;
+      } else {
+        // For normal flat fee cases
+        tariffAmount.textContent = `Estimated tariff amount: ${tariffData.flatFeeAmount.toFixed(2)} (flat fee)`;
+      }
+    } else {
+      // For percentage-based tariffs
+      tariffAmount.textContent = `Estimated tariff amount: ${tariffData.tariffAmount.toFixed(2)}`;
+    }
+    
+    tariffAmount.style.cssText = `
+      margin: 5px 0;
+      color: #B12704;
+      font-weight: bold;
+    `;
+    tariffInfo.appendChild(tariffAmount);
+    
+    // Create rate display
+    const tariffRate = document.createElement('p');
+    
+    // Customize rate display based on case
+    if (tariffData.isUsingFlatFee) {
+      if (tariffData.specialPriceLogic) {
+        // For special logic cases, show equivalent percentage
+        const effectiveRate = (tariffData.tariffAmount / tariffData.preTariffPrice) * 100;
+        tariffRate.textContent = `(Equivalent to approximately ${effectiveRate.toFixed(0)}% of pre-tariff price)`;
+      } else {
+        // For normal flat fee cases
+        tariffRate.textContent = `(Standard rate: 120.0%, using $100 flat fee minimum)`;
+      }
+    } else {
+      // For percentage-based tariffs
+      tariffRate.textContent = `(${(tariffData.tariffRate * 100).toFixed(1)}% tariff rate)`;
+    }
+    
+    tariffRate.style.cssText = `
+      margin: 0 0 10px 0;
+      font-size: 12px;
+      color: #666;
+    `;
+    tariffInfo.appendChild(tariffRate);
+    
+    // Final price (which is the displayed Amazon price)
+    const amazonPrice = document.createElement('p');
+    amazonPrice.textContent = `Price with tariff (what you see): ${productData.price.toFixed(2)}`;
+    amazonPrice.style.fontWeight = 'bold';
+    amazonPrice.style.margin = '10px 0 5px 0';
+    tariffInfo.appendChild(amazonPrice);
+  } else {
+    tariffStatus.textContent = 'Not subject to tariff tax';
+    tariffStatus.style.color = '#007600'; // Amazon's success green
+  }
+  
+  tariffInfo.appendChild(tariffTitle);
+  tariffInfo.appendChild(tariffStatus);
+}
