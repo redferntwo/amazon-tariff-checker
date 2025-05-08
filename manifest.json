@@ -12,34 +12,38 @@
 {
   "manifest_version": 3,
   "name": "Amazon Tariff Fee Checker",
-  "version": "1.0",
-  "description": "Checks if products on Amazon.com might be subject to tariff fees when shipping to the US",
-  "author": "The Dual Lens",
-  "homepage_url": "https://duallens.substack.com",
+  "version": "1.1.0",
+  "description": "Estimates and highlights tariff costs on Amazon products",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    },
-    "default_title": "Amazon Tariff Fee Checker"
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.amazon.com/*"
   ],
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.com/*"],
-      "js": ["content.js"]
+      "matches": ["*://*.amazon.com/*/dp/*", "*://*.amazon.com/dp/*"],
+      "js": ["scripts/content.js"]
     }
   ],
-  "background": {
-    "service_worker": "background.js"
-  }
+  "web_accessible_resources": [
+    {
+      "resources": ["scripts/content-injection.js"],
+      "matches": ["*://*.amazon.com/*"]
+    }
+  ]
 }
